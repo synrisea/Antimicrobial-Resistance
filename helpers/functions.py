@@ -32,7 +32,6 @@ def calculate_total_n(file_paths):
                      'Number of\n3GCRKP\nincluded in\nanalysis/total\nnumber of\n3GCRKP',
                      'N','N.1','N.2','N.3']
     total_N = 0
-
     for file_path in file_paths:
         excel_file = pd.ExcelFile(file_path)
 
@@ -59,7 +58,68 @@ def calculate_total_n(file_paths):
                                 continue
                             else:
                                 df[col] = pd.to_numeric(df[col], errors='coerce')
-
                         sum_result = df[col].sum(skipna=True)
                         total_N += sum_result
     print(f"Total number of tested isolates throughout 2010-2015 : {total_N}")
+
+def getResistancePercentages(file_paths):
+    search_patterns = [
+    "% ESBL", "%R ", "%R .1", "%R .2", "%R .3",
+    "%IR ", "%IR .1", "%IR .2", "%IR .3",
+    "% of total*", "% of total**"
+    ]
+
+    resistances = []
+
+    for file_path in file_paths:
+        excel_file = pd.ExcelFile(file_path)
+
+        for sheet in excel_file.sheet_names:
+            std_header = 2
+            df = pd.read_excel(file_path, header=std_header, sheet_name=sheet)
+
+            while not df.empty and df.columns[0].startswith("Unnamed"):
+                std_header += 1
+                df = pd.read_excel(file_path, header=std_header, sheet_name=sheet)
+        
+            for search_pattern in search_patterns:
+                for col_idx, col in enumerate(df.columns):
+                    if col == search_pattern:
+
+                        left_col_idx = col_idx - 1
+                        if left_col_idx < 0:  
+                            continue
+                        
+                        if col in ["% of total*", "% of total**"]:
+                            df_filtered = df[~df.iloc[:, 0].astype(str).str.startswith('Total', na=False)]
+                            df_filtered.loc[df_filtered[col].astype(str).str.strip() == '<0.1', col] = 0.05
+                            numeric_values = pd.to_numeric(df_filtered[col], errors='coerce').dropna()
+                        elif col in ["%R ", "%R .1", "%R .2", "%R .3", "%IR ", "%IR .1", "%IR .2", "%IR .3"]:
+                            if (file_path.startswith("AMR_datasets\\2014") or file_path.startswith("AMR_datasets\\2015")) and col not in ["%R .3", "%IR .3"]:
+                                continue
+                            numeric_values = pd.to_numeric(df[col], errors='coerce').dropna()
+                        else:
+                            numeric_values = pd.to_numeric(df[col], errors='coerce').dropna()
+                        
+                        left_column = df.iloc[:, left_col_idx]
+                        for i, value in enumerate(df[col]):
+                            if pd.notna(value): 
+                                count = pd.to_numeric(left_column.iloc[i], errors="coerce")
+                                if pd.notna(count) and count > 0:
+                                    resistances.extend([value] * int(count))
+
+
+    resistances_filtered = []
+    for value in resistances:
+        if isinstance(value, str):
+            if '\xa0' in value:
+                try:
+                    value = float(value.replace('\xa0', '').strip())
+                    resistances_filtered.append(value)
+                except ValueError:
+                    continue
+        else:
+            resistances_filtered.append(value)
+
+    return resistances_filtered
+
