@@ -62,7 +62,9 @@ def calculate_total_n(file_paths):
                         total_N += sum_result
     print(f"Total number of tested isolates throughout 2010-2015 : {total_N}")
 
-def getResistancePercentages(file_paths):
+# Function to get the resistance percentages in a single list
+
+def get_resistance_percentages(file_paths):
     search_patterns = [
     "% ESBL", "%R ", "%R .1", "%R .2", "%R .3",
     "%IR ", "%IR .1", "%IR .2", "%IR .3",
@@ -122,4 +124,71 @@ def getResistancePercentages(file_paths):
             resistances_filtered.append(value)
 
     return resistances_filtered
+
+
+
+def get_year_from_path(file_path):
+    for year in ["2013", "2014", "2015"]:
+        if f"AMR_datasets\\{year}" in file_path:
+            return int(year)
+    return None
+
+def get_N_per_year(file_paths):
+    search_patterns = {
+        'Number of.1', 'Number of isolates', 'Number of \ntested isolates', 
+        'Number of tested isolates', 'Number of \n3GCREC included in analysis/ total number of 3GCREC',
+        'Number of\n3GCRKP\nincluded in\nanalysis/total\nnumber of\n3GCRKP',
+        'N', 'N.1', 'N.2', 'N.3'
+    }
+
+    N_per_year = {year: [] for year in range(2010, 2016)}
+
+    year_column_map = {
+        'N': 2010, 
+        'N.1': 2011, 
+        'N.2': 2012, 
+        'N.3': 2013
+    }
+
+    for file_path in file_paths:
+        excel_file = pd.ExcelFile(file_path)
+
+        for sheet in excel_file.sheet_names:
+            std_header = 2
+            df = pd.read_excel(file_path, header=std_header, sheet_name=sheet)
+
+            while not df.empty and df.columns[0].startswith("Unnamed"):
+                std_header += 1
+                df = pd.read_excel(file_path, header=std_header, sheet_name=sheet)
+
+            year = get_year_from_path(file_path)
+            if year is None:
+                continue
+
+            for col in df.columns:
+                if col not in search_patterns:
+                    continue  
+
+                if col in ('N', 'N.1', 'N.2', 'N.3'):
+                    if year == 2013 and col in year_column_map:
+                        N_per_year[year_column_map[col]].extend(df[col].dropna().tolist())
+                    elif year in {2014, 2015} and col == "N.3":
+                        N_per_year[year].extend(df[col].dropna().tolist())
+                else: 
+                    if "3GCREC" in col or "3GCRKP" in col:
+                        df[col] = df[col].astype(str).str.extract(r'(\d+)')[0]
+                    
+                    if col in {'Number of isolates', 'Number of \ntested isolates', 'Number of tested isolates', 'Number of.1'}:
+                        df = df[~df.iloc[:, 0].str.startswith('Total', na=False)]
+                    
+                    df[col] = pd.to_numeric(df[col], errors='coerce')
+                    N_per_year[year].extend(df[col].dropna().tolist())
+
+    N_per_year_cleaned = {
+    year: [value for value in values if isinstance(value, (int, float))]
+    for year, values in N_per_year.items()
+    }
+
+    sum_per_year = {year: sum(values) for year, values in N_per_year_cleaned.items()}
+    return sum_per_year
 
