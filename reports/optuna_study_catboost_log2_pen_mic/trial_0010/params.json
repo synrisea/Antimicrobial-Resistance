@@ -1,0 +1,14 @@
+{
+    "iterations": 2400,
+    "learning_rate": 0.09739053978553844,
+    "depth": 8,
+    "l2_leaf_reg": 3.240756086224882,
+    "subsample": 0.85,
+    "colsample_bylevel": 0.5,
+    "min_data_in_leaf": 1,
+    "loss_function": "RMSE",
+    "eval_metric": "RMSE",
+    "random_seed": 42,
+    "verbose": 0,
+    "early_stopping_rounds": 150
+}

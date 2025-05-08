@@ -1,0 +1,16 @@
+{
+    "target_variable": "Non-susceptible",
+    "MAE": 4.231980181481945,
+    "RMSE": 6.5029097321173985,
+    "R2": 0.6215920071425112,
+    "best_hyperparameters": {
+        "iterations": 2000,
+        "learning_rate": 0.012323665510013944,
+        "depth": 4,
+        "l2_leaf_reg": 0.6155653139875691,
+        "subsample": 0.65,
+        "colsample_bylevel": 0.8,
+        "min_data_in_leaf": 62,
+        "early_stopping_rounds": 100
+    }
+}

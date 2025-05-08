@@ -1,0 +1,16 @@
+{
+    "target_variable": "log2_pen_mic",
+    "MAE": 1.326368135244414,
+    "RMSE": 1.6810858697769768,
+    "R2": -0.1937360148745093,
+    "best_hyperparameters": {
+        "iterations": 1400,
+        "learning_rate": 0.043335518426056645,
+        "depth": 5,
+        "l2_leaf_reg": 2.740642912973252,
+        "subsample": 0.95,
+        "colsample_bylevel": 0.8500000000000001,
+        "min_data_in_leaf": 6,
+        "early_stopping_rounds": 75
+    }
+}

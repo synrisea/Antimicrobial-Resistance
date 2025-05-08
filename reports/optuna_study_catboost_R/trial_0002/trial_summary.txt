@@ -1,0 +1,4 @@
+Average RMSE: 7.3885
+Std RMSE: 1.3557
+Average MAE: 5.1668
+Average Actual Iterations: 558

@@ -1,0 +1,16 @@
+{
+    "target_variable": "log2_cfx_mic",
+    "MAE": 1.0358732424549135,
+    "RMSE": 1.21943561258021,
+    "R2": -0.23255230837498297,
+    "best_hyperparameters": {
+        "iterations": 2500,
+        "learning_rate": 0.05810014841318824,
+        "depth": 3,
+        "l2_leaf_reg": 3.7134095552625217,
+        "subsample": 1.0,
+        "colsample_bylevel": 0.6,
+        "min_data_in_leaf": 68,
+        "early_stopping_rounds": 200
+    }
+}
